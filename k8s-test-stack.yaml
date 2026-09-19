@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: jf-web
 ---
-# Hardened NGINX Web Server
+# Hardened NGINX Web Server with Resource Requests for Autoscaling
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +32,14 @@ spec:
           capabilities:
             drop:
             - ALL
-        # Mount writable scratch spaces for NGINX
+        # Resource requests are required so the HPA knows when CPU exceeds 50%
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"
         volumeMounts:
         - name: tmp-volume
           mountPath: /tmp
@@ -40,7 +47,6 @@ spec:
           mountPath: /var/cache/nginx
         - name: run-volume
           mountPath: /var/run
-      # Define temporary in-memory volumes
       volumes:
       - name: tmp-volume
         emptyDir: {}
@@ -56,9 +62,30 @@ metadata:
   name: jf-web-service
   namespace: jf-web
 spec:
-  type: LoadBalancer # This tells k3s to expose this service on the host IP
+  type: LoadBalancer
   selector:
     app: jf-web
   ports:
   - port: 80
     targetPort: 8080
+---
+# Horizontal Pod Autoscaler (Scales from 2 to 10 pods under heavy load)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: jf-web-hpa
+  namespace: jf-web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: jf-web-deployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
