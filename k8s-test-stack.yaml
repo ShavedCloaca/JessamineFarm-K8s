@@ -66,7 +66,7 @@ spec:
   selector:
     app: jf-web
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 # Horizontal Pod Autoscaler (Scales from 2 to 10 pods under heavy load)
