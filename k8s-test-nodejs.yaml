@@ -92,7 +92,7 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
-  - host: "172.16.1.241.nodejs.sslip.io" # <-- REPLACE THIS WITH YOUR SERVER IP!
+  - host: "172.16.1.214.sslip.io" # <-- REPLACE THIS WITH YOUR SERVER IP!
     http:
       paths:
       - path: /
