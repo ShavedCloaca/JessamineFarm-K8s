@@ -54,11 +54,11 @@ spec:
         # Resource Requests for Autoscaling
         resources:
           requests:
-            cpu: "20m"
-            memory: "32Mi"
-          limits:
             cpu: "100m"
-            memory: "64Mi"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
             
         # Node.js scratch space
         volumeMounts:
@@ -107,13 +107,13 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: jf-web-hpa-nodejs
-  namespace: jf-web-nodejs
+  name: jf-web-hpa
+  namespace: jf-web
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: jf-web-deployment-nodejs
+    name: jf-web-deployment
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -122,4 +122,4 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 50
+        averageUtilization: 70 # Increased from 50
