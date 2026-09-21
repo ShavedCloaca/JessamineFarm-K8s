@@ -62,11 +62,11 @@ metadata:
   name: jf-web-service
   namespace: jf-web
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: jf-web
   ports:
-  - port: 8080
+  - port: 80
     targetPort: 8080
 ---
 # Horizontal Pod Autoscaler (Scales from 2 to 10 pods under heavy load)
@@ -89,3 +89,24 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50
+---
+# Traefik Ingress Routing
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jf-web-ingress
+  namespace: jf-web
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+  - host: "172.16.1.214.sslip.io"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jf-web-service
+            port:
+              number: 80
