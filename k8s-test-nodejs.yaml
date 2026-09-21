@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jf-web-nodejs
+---
+# Node.js Express Web Server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jf-web-deployment-nodejs
+  namespace: jf-web-nodejs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jf-web-nodejs
+  template:
+    metadata:
+      labels:
+        app: jf-web-nodejs
+    spec:
+      containers:
+      - name: web
+        image: ghcr.io/shavedcloaca/jessamine-farm:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        
+        # Hardened Security Context for Node.js (UID 1000)
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+            
+        # Health Probes
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 2
+          periodSeconds: 5
+          
+        # Resource Requests for Autoscaling
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"
+            
+        # Node.js scratch space
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+---
+# INTERNAL Cluster Routing Service (Locked down)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jf-web-service-nodejs
+  namespace: jf-web-nodejs
+spec:
+  type: ClusterIP
+  selector:
+    app: jf-web-nodejs
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+# Traefik Ingress Routing (The Bouncer)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jf-web-ingress-nodejs
+  namespace: jf-web-nodejs
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+  - host: "172.16.1.241.nodejs.sslip.io" # <-- REPLACE THIS WITH YOUR SERVER IP!
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jf-web-service-nodejs
+            port:
+              number: 80
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: jf-web-hpa-nodejs
+  namespace: jf-web-nodejs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: jf-web-deployment-nodejs
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
