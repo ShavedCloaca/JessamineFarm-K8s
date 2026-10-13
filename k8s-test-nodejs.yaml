@@ -26,6 +26,9 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        envFrom:
+        - secretRef:
+          name: email-secrets
         
         # Hardened Security Context for Node.js (UID 1000)
         securityContext:
