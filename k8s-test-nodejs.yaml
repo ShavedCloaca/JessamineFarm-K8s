@@ -11,7 +11,7 @@ metadata:
   namespace: jf-web-nodejs
 spec:
   revisionHistoryLimit: 2
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: jf-web-nodejs

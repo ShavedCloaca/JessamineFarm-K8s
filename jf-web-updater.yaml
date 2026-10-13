@@ -1,0 +1,13 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: jf-web-updater
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: "jf-web-nodejs"
+      images:
+        - alias: "web"
+          imageName: "ghcr.io/shavedcloaca/jessamine-farm:latest"
+          commonUpdateSettings:
+            updateStrategy: "digest"
