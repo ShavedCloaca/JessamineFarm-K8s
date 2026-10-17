@@ -108,6 +108,16 @@ spec:
             name: jf-web-service-nodejs
             port:
               number: 80
+  - host: "www.jessaminefarm.co.uk"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jf-web-service-nodejs
+            port:
+              number: 80
 ---
 # Horizontal Pod Autoscaler
 apiVersion: autoscaling/v2
