@@ -7,7 +7,7 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
-    - host: "grafana.jessaminefarm.co.uk"
+    - host: "grafana.172.16.1.214.sslip.io" # <--- Resolves internally to your server
       http:
         paths:
           - path: /
