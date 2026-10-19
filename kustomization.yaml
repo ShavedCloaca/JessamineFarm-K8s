@@ -4,3 +4,4 @@ resources:
   - k8s-test-nodejs.yaml
   - observability.yaml
   - cloudflare-tunnel.yaml
+  - grafana-ingress.yaml
