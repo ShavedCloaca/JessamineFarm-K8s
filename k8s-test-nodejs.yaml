@@ -85,7 +85,8 @@ spec:
   selector:
     app: jf-web-nodejs
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: 8080
 ---
 # Traefik Ingress Routing (The Bouncer)
@@ -139,3 +140,20 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
+        apiVersion: monitoring.coreos.com/v1
+---
+# ServiceMonitor for Prometheus
+kind: ServiceMonitor
+metadata:
+  name: jf-web-servicemonitor
+  namespace: jf-web-nodejs
+  labels:
+    release: cluster-monitoring  # Must match the Helm release name of kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: jf-web-nodejs
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
