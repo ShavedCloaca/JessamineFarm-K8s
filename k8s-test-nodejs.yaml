@@ -140,9 +140,9 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
-        apiVersion: monitoring.coreos.com/v1
 ---
 # ServiceMonitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: jf-web-servicemonitor
