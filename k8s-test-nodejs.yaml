@@ -80,6 +80,8 @@ kind: Service
 metadata:
   name: jf-web-service-nodejs
   namespace: jf-web-nodejs
+  labels:
+    app: jf-web-nodejs
 spec:
   type: ClusterIP
   selector:
